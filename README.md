@@ -1,5 +1,7 @@
 # cuneiform-convert
 To run this repository, first install imagemagick and [autotrace](https://github.com/autotrace/autotrace).
+# How to use
+Run `png_to_svg.py`, and then, if you want the filenames to contain the q-codes, you can also run `fix_filenames.py`.
 
 # How to install imagemagick and autotrace (on MacOS)
 

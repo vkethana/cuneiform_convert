@@ -4,9 +4,6 @@ To run this repository, first install imagemagick and [autotrace](https://github
 Run `png_to_svg.py`, and then, if you want the filenames to contain the q-codes, you can also run `fix_filenames.py`.
 
 # How to install imagemagick and autotrace (on MacOS)
-
-First run `brew install imagemagick`, and then run:
-
 ```
 export PATH="/usr/local/opt/gettext/bin:$PATH"
 perl -MCPAN -e 'install XML::Parser'

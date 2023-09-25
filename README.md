@@ -2,6 +2,7 @@
 To run this repository, first install imagemagick and [autotrace](https://github.com/autotrace/autotrace). Images are originally from [this](https://github.com/oaregithub/OAsigns) repository.
 # How to use
 Run `png_to_svg.py`, and then, if you want the filenames to contain the q-codes, you can also run `fix_filenames.py`.
+Make sure you also install SPARQLWrapper, PIL, and BeautifulSoup.
 
 # How to install imagemagick and autotrace (on MacOS)
 ```

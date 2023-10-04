@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="yes"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="456" height="371">
-<path style="fill:#ffffff; stroke:none;" d="M0 0L0 371L456 371L456 0L0 0z"/>
-<path style="fill:#1f1f1f; stroke:none;" d="M289 31L290 32L289 31z"/>
+<!-- <path style="fill:#ffffff; stroke:none;" d="M0 0L0 371L456 371L456 0L0 0z"/>
+--><path style="fill:#1f1f1f; stroke:none;" d="M289 31L290 32L289 31z"/>
 <path style="fill:#0e0e0e; stroke:none;" d="M290 31L291 32L290 31z"/>
 <path style="fill:#111111; stroke:none;" d="M291 31L292 32L291 31z"/>
 <path style="fill:#121212; stroke:none;" d="M292 31L292 32L296 32L292 31z"/>

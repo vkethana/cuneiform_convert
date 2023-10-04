@@ -154,9 +154,7 @@ for filename in os.listdir('png_stratford'):
     os.system('autotrace png_stratford/' + filename + ' -output-format svg -output-file ' + new_path)
     #shutil.copy("svg_with_form_label/"+file_form_label+".svg", "svg_with_qcode/"+file_id+".svg")
 
-
 def remove_transparency_in_directory(directory_path):
-# Iterate through files in the directory
   for filename in os.listdir(directory_path):
       if filename.endswith(".svg"):
           file_path = os.path.join(directory_path, filename)

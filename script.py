@@ -35,17 +35,21 @@ def get_image_file_url(wikidata_url):
     else:
         return None
 
-# Function for image matching
-def are_images_same(image_path1, image_path2):
-    # Load the images
-    try:
-      img1 = Image.open(image_path1)
-      img2 = Image.open(image_path2)
-      return img1 == img2
-    # Return an error
-    except:
-      print("ERROR:", image_path1, " or ", image_path2, " may be a broken file")
-      return 0
+# Gets rid of transparency in SVG file
+# generated with ChatGPT
+def remove_transparency(file_path):
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    # Check if there are at least 3 lines in the file
+    if len(lines) >= 3 and lines[2].startswith('<path style="fill:#ffffff; stroke:none;'):
+        # Comment out the third line
+        lines[2] = '<!-- ' + lines[2] + "-->"
+        #del lines[2]
+
+        # Write modified content back to the file
+        with open(file_path, 'w') as file:
+            file.writelines(lines)
 
 # Obtain q-id given URL of wikidata entry
 def get_q_id(url):
@@ -150,4 +154,13 @@ for filename in os.listdir('png_stratford'):
     os.system('autotrace png_stratford/' + filename + ' -output-format svg -output-file ' + new_path)
     #shutil.copy("svg_with_form_label/"+file_form_label+".svg", "svg_with_qcode/"+file_id+".svg")
 
+def remove_transparency_in_directory(directory_path):
+  for filename in os.listdir(directory_path):
+      if filename.endswith(".svg"):
+          file_path = os.path.join(directory_path, filename)
+          remove_transparency(file_path)
+          print(f"Processed: {file_path}")
+
+remove_transparency_in_directory('svg_stratford')
+remove_transparency_in_directory('svg_wikidata')
 

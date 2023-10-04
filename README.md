@@ -21,3 +21,6 @@ make
 make install
 ```
 (from [this link](https://github.com/autotrace/autotrace/blob/master/INSTALL_OSX.md))
+
+# Caveats
+The script does its best to remove transparency from images. Note that some regions of transparency cannot be removed. Within a sign, any empty white space enclosed on all sides will not become transparent. In short, the exterior of the image becomes transparent, but "pockets" of transparency within the sign do not.

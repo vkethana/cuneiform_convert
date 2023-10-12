@@ -35,22 +35,6 @@ def get_image_file_url(wikidata_url):
     else:
         return None
 
-# Gets rid of transparency in SVG file
-# generated with ChatGPT
-def remove_transparency(file_path):
-    with open(file_path, 'r') as file:
-        lines = file.readlines()
-
-    # Check if there are at least 3 lines in the file
-    if len(lines) >= 3 and lines[2].startswith('<path style="fill:#ffffff; stroke:none;'):
-        # Comment out the third line
-        lines[2] = '<!-- ' + lines[2] + "-->"
-        #del lines[2]
-
-        # Write modified content back to the file
-        with open(file_path, 'w') as file:
-            file.writelines(lines)
-
 # Obtain q-id given URL of wikidata entry
 def get_q_id(url):
   q_index = url.find('Q')
@@ -77,8 +61,8 @@ query = """SELECT ?form ?charaLabel ?formLabel ?image WHERE {
     FILTER((LANG(?charaLabel)) = "en")
   }
 }"""
-# This is a custom sparql query, it excludes the two cuneiform signs that I already changed to SVG
 
+# This is a custom sparql query, it excludes the two cuneiform signs that I already changed to SVG
 def get_results(endpoint_url, query):
     user_agent = "WDQS-example Python/%s.%s" % (sys.version_info[0], sys.version_info[1])
     # TODO adjust user agent; see https://w.wiki/CX6
@@ -91,21 +75,14 @@ def get_results(endpoint_url, query):
 results = get_results(endpoint_url, query)
 q_id_to_form_label = {}
 for item in results["results"]["bindings"]:
-    #pprint(item)
     # Get the Q-ID
     curr_q_id = get_q_id(item['form']['value'])
-    #print(curr_q_id)
     # Add to dictoinary
     q_id_to_form_label[curr_q_id] = item['formLabel']['value']
     # Get the img URL
     url = item["image"]['value']
-    #print(curr_q_id, url)
-    #url = get_image_file_url(url)
-    #print(curr_q_id, url)
     # you have to wrap this in a function call because the provided image URL doesn't actually work, you have to modify it to get the image file
     # Get image data from URL
-    # Download image
-    #print("Downloading ", curr_q_id, "...")
     img_path = "png_wikidata/" + curr_q_id + ".png"
     if os.path.exists(img_path):
       print("Downloading ", curr_q_id, "...")
@@ -116,51 +93,52 @@ for item in results["results"]["bindings"]:
         handler.write(img_data)
 
 # Convert the PNGs to SVGs
-print("Converting the PNGs to SVGs...")
-for filename in os.listdir('png_wikidata'):
-  if filename[-4:] == ".png":
-    #print("autotrace png/" + filename + " -output-format svg -output-file svg/" + os.path.splitext(filename)[0] + ".svg")
-    file_id = os.path.splitext(filename)[0]
-    file_form_label = q_id_to_form_label[file_id]
-    file_form_label = file_form_label.replace('/', ' ') # necessary because of how UNIX file structures work
-    new_path = 'svg_wikidata/"' + file_form_label
-    new_path += '.svg"'
+def conv_to_svg(folder_prefix):
+    folder_path = "png_"+folder_prefix
+    print("Converting the PNGs to SVGs for the folder " + folder_path)
+    for filename in os.listdir(folder_path):
+      if filename[-4:] == ".png":
+        file_id = os.path.splitext(filename)[0]
+        print("Converting " + file_id + " ...")
 
-    new_path_without_quotes = 'svg_wikidata/' + file_form_label +'.svg'
-    if os.path.exists(new_path_without_quotes):
-      print("File already exists!")
-      continue
+        if folder_prefix == "wikidata":
+            file_form_label = q_id_to_form_label[file_id]
+            file_form_label = file_form_label.replace('/', ' ') # necessary because of how UNIX file structures work
+            file_id = file_form_label
 
-    if filename == '119574268.png' or filename == '119573897.png':
-      print("\n\nWARNING: Filename contains illegal character. Attempting to convert...")
-      print("Converting", filename, "to", new_path, "\n\n")
+        svg_path = 'svg_' + folder_prefix + '/' + file_id
+        svg_path += '.svg'
 
-    print("Running the command:   autotrace png_wikidata/" + filename + " -output-format svg -output-file " + new_path)
-    os.system('autotrace png_wikidata/' + filename + ' -output-format svg -output-file ' + new_path)
-    #shutil.copy("svg_with_form_label/"+file_form_label+".svg", "svg_with_qcode/"+file_id+".svg")
+        pnm_filepath = "misc_files/" + file_id + ".pnm"
+        recolor_filepath = "misc_files/" + file_id + "_recolor.png"
+        if os.path.exists(svg_path):
+          print("   SVG file already exists! Converting anyway...")
+          #continue
 
-for filename in os.listdir('png_stratford'):
-  if filename[-4:] == ".png":
-    #print("autotrace png/" + filename + " -output-format svg -output-file svg/" + os.path.splitext(filename)[0] + ".svg")
-    file_id = os.path.splitext(filename)[0]
-    new_path = 'svg_stratford/' + file_id
-    new_path += '.svg'
+        cmds = []
 
-    if os.path.exists(new_path):
-      print("File already exists!")
-      continue
+        # Convert PNG into nongrayscale version so that imgmagick can read it properly
+        if not os.path.exists(recolor_filepath):
+          cmds.append('convert -density 300 "' + folder_path + '/' + filename + '" -quality 90 -colorspace RGB -background white -alpha remove -alpha off "' + recolor_filepath + '"')
+        else:
+          print("Recolored PNGs already exist!")
 
-    print("Running the command:   autotrace png_stratford/" + filename + " -output-format svg -output-file " + new_path)
-    os.system('autotrace png_stratford/' + filename + ' -output-format svg -output-file ' + new_path)
-    #shutil.copy("svg_with_form_label/"+file_form_label+".svg", "svg_with_qcode/"+file_id+".svg")
+        # Convert PNG into PNM
+        if not os.path.exists(pnm_filepath):
+          cmds.append('convert "' + recolor_filepath + '" "' + pnm_filepath + '"')
+        else:
+          print("PNM files already exist!")
 
-def remove_transparency_in_directory(directory_path):
-  for filename in os.listdir(directory_path):
-      if filename.endswith(".svg"):
-          file_path = os.path.join(directory_path, filename)
-          remove_transparency(file_path)
-          print(f"Processed: {file_path}")
+        # Potrace turns the PNM img to SVG (Potrace can't use PNG files)
+        cmds.append('potrace "' + pnm_filepath + '" -s -o "' + svg_path + '"')
 
-remove_transparency_in_directory('svg_stratford')
-remove_transparency_in_directory('svg_wikidata')
+        # Remove the unneeded intermediate files (optional)
+        #pt4 = "rm intermediate_files/*"
+        # If you uncomment the above line, the code will use up a lot less space. But it's often helpful to keep the intermediate files to speed up subsequent conversion tasks
 
+        for cmd in cmds:
+          #print(cmd)
+          os.system(cmd)
+
+conv_to_svg("wikidata")
+conv_to_svg("stratford")
